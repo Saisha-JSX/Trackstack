@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -61,9 +62,19 @@ const collectionData = [
 ];
 
 export default function Home() {
-  // Render each Recently Added card
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleManagePress = () => {
+    Alert.alert('Manage Collections', 'This feature is under development.');
+  };
+
+  const filteredCollections = collectionData.filter(item =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Render Recently Added item
   const renderRecentlyAddedItem = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => console.log(item.title)}>
       <View>
         <Image source={{ uri: item.image }} style={styles.cardImage} />
         <View style={styles.categoryTag}>
@@ -73,17 +84,17 @@ export default function Home() {
       <Text style={styles.cardTitle} numberOfLines={1}>
         {item.title}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 
-  // Render each Collection item
+  // Render Collection item
   const renderCollectionItem = ({ item }) => (
-    <View style={styles.collectionItem}>
+    <TouchableOpacity style={styles.collectionItem} onPress={() => console.log(item.title)}>
       <Image source={{ uri: item.thumbnail }} style={styles.collectionThumbnail} />
       <Text style={styles.collectionTitle} numberOfLines={1}>
         {item.title}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -98,11 +109,13 @@ export default function Home() {
           placeholder="Search your media"
           placeholderTextColor="#888"
           style={styles.searchInput}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
 
       <FlatList
-        data={collectionData}
+        data={filteredCollections}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={styles.collectionRow}
@@ -110,12 +123,11 @@ export default function Home() {
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <>
-            {/* Recently Added heading */}
+            {/* Recently Added Section */}
             <View style={styles.sectionHeaderContainer}>
               <Text style={styles.sectionTitle}>Recently Added</Text>
             </View>
 
-            {/* Recently Added carousel */}
             <FlatList
               data={recentlyAddedData}
               keyExtractor={(item) => item.id}
@@ -126,10 +138,10 @@ export default function Home() {
               renderItem={renderRecentlyAddedItem}
             />
 
-            {/* Your Collection heading + Manage button */}
+            {/* Your Collection Section */}
             <View style={[styles.sectionHeaderContainer, { marginTop: 30, marginBottom: 10 }]}>
               <Text style={styles.sectionTitle}>Your Collection</Text>
-              <TouchableOpacity style={styles.manageButton}>
+              <TouchableOpacity style={styles.manageButton} onPress={handleManagePress}>
                 <Text style={styles.manageButtonText}>Manage</Text>
               </TouchableOpacity>
             </View>
@@ -222,13 +234,13 @@ const styles = StyleSheet.create({
     color: '#111',
   },
   collectionRow: {
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
+    justifyContent: 'space-between',
     marginBottom: 20,
   },
   collectionItem: {
     flex: 1,
-    marginHorizontal: 5,
+    maxWidth: '48%',
     alignItems: 'center',
   },
   collectionThumbnail: {
