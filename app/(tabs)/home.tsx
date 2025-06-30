@@ -1,155 +1,64 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Alert, ScrollView } from 'react-native';
+import SearchBar from '../../components/ui/SearchBar';
+import RecentlyAdded from '../../components/ui/RecentlyAdded';
+import CollectionGrid from '../../components/ui/CollectionGrid';
+import SectionHeader from '../../components/ui/SectionHeader';
 
 const recentlyAddedData = [
-  {
-    id: '1',
-    title: 'Attack on Titan',
-    category: 'Anime',
-    image: 'https://bit.ly/3o5rD2F',
-  },
-  {
-    id: '2',
-    title: 'Solo Leveling',
-    category: 'Manhwa',
-    image: 'https://bit.ly/3Ynz2My',
-  },
-  {
-    id: '3',
-    title: 'Naruto',
-    category: 'Anime',
-    image: 'https://bit.ly/3HQGbNf',
-  },
-  {
-    id: '4',
-    title: 'Tower of God',
-    category: 'Manhwa',
-    image: 'https://bit.ly/3opdyTL',
-  },
+  { id: '1', title: 'Attack on Titan', category: 'Anime', image: 'https://bit.ly/3o5rD2F' },
+  { id: '2', title: 'Solo Leveling', category: 'Manhwa', image: 'https://bit.ly/3Ynz2My' },
+  { id: '3', title: 'Naruto', category: 'Anime', image: 'https://bit.ly/3HQGbNf' },
+  { id: '4', title: 'Tower of God', category: 'Manhwa', image: 'https://bit.ly/3opdyTL' },
 ];
 
 const collectionData = [
-  {
-    id: '1',
-    title: 'Favorites',
-    thumbnail: 'https://bit.ly/3Kb4GJq',
-  },
-  {
-    id: '2',
-    title: 'Watch Later',
-    thumbnail: 'https://bit.ly/3IzA4LR',
-  },
-  {
-    id: '3',
-    title: 'Completed',
-    thumbnail: 'https://bit.ly/3Zo6PSW',
-  },
-  {
-    id: '4',
-    title: 'To Explore',
-    thumbnail: 'https://bit.ly/3IqQGuR',
-  },
+  { id: '1', title: 'Favorites', thumbnail: 'https://bit.ly/3Kb4GJq' },
+  { id: '2', title: 'Watch Later', thumbnail: 'https://bit.ly/3IzA4LR' },
+  { id: '3', title: 'Completed', thumbnail: 'https://bit.ly/3Zo6PSW' },
+  { id: '4', title: 'To Explore', thumbnail: 'https://bit.ly/3IqQGuR' },
 ];
 
-export default function Home() {
+export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleManagePress = () => {
     Alert.alert('Manage Collections', 'This feature is under development.');
   };
 
+  const filteredRecentlyAdded = recentlyAddedData.filter(item =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const filteredCollections = collectionData.filter(item =>
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Render Recently Added item
-  const renderRecentlyAddedItem = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => console.log(item.title)}>
-      <View>
-        <Image source={{ uri: item.image }} style={styles.cardImage} />
-        <View style={styles.categoryTag}>
-          <Text style={styles.categoryTagText}>{item.category}</Text>
-        </View>
-      </View>
-      <Text style={styles.cardTitle} numberOfLines={1}>
-        {item.title}
-      </Text>
-    </TouchableOpacity>
-  );
-
-  // Render Collection item
-  const renderCollectionItem = ({ item }) => (
-    <TouchableOpacity style={styles.collectionItem} onPress={() => console.log(item.title)}>
-      <Image source={{ uri: item.thumbnail }} style={styles.collectionThumbnail} />
-      <Text style={styles.collectionTitle} numberOfLines={1}>
-        {item.title}
-      </Text>
-    </TouchableOpacity>
-  );
-
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 20 }}>
       <Text style={styles.header}>TrackStack</Text>
+      <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
-        <TextInput
-          placeholder="Search your media"
-          placeholderTextColor="#888"
-          style={styles.searchInput}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
+      <SectionHeader title="Recently Added" />
+      {filteredRecentlyAdded.length > 0 ? (
+        <RecentlyAdded data={filteredRecentlyAdded} />
+      ) : (
+        <Text style={styles.noResultsText}>No recently added items match your search.</Text>
+      )}
 
-      <FlatList
-        data={filteredCollections}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.collectionRow}
-        contentContainerStyle={styles.flatListContent}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <>
-            {/* Recently Added Section */}
-            <View style={styles.sectionHeaderContainer}>
-              <Text style={styles.sectionTitle}>Recently Added</Text>
-            </View>
-
-            <FlatList
-              data={recentlyAddedData}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.recentlyAddedList}
-              ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
-              renderItem={renderRecentlyAddedItem}
-            />
-
-            {/* Your Collection Section */}
-            <View style={[styles.sectionHeaderContainer, { marginTop: 30, marginBottom: 10 }]}>
-              <Text style={styles.sectionTitle}>Your Collection</Text>
-              <TouchableOpacity style={styles.manageButton} onPress={handleManagePress}>
-                <Text style={styles.manageButtonText}>Manage</Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        }
-        renderItem={renderCollectionItem}
+      <SectionHeader
+        title="Your Collection"
+        showAction
+        actionLabel="Manage"
+        onPress={handleManagePress}
+        style={{ marginTop: 30, marginBottom: 10 }}
       />
-    </View>
+      {filteredCollections.length > 0 ? (
+        <CollectionGrid data={filteredCollections} />
+      ) : (
+        <Text style={styles.noResultsText}>No collections match your search.</Text>
+      )}
+    </ScrollView>
   );
 }
 
@@ -166,106 +75,11 @@ const styles = StyleSheet.create({
     color: '#111',
     marginBottom: 15,
   },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 20,
-    backgroundColor: '#f1f3f6',
-    borderRadius: 15,
-    paddingHorizontal: 15,
-    height: 40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    marginBottom: 20,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#111',
-  },
-  sectionHeaderContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  noResultsText: {
     paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#222',
-  },
-  recentlyAddedList: {
-    paddingLeft: 20,
-    paddingRight: 10,
+    fontSize: 16,
+    color: '#888',
+    fontStyle: 'italic',
     marginTop: 10,
-  },
-  card: {
-    width: 140,
-  },
-  cardImage: {
-    width: 140,
-    height: 200,
-    borderRadius: 12,
-  },
-  categoryTag: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    backgroundColor: '#007aff',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-  },
-  categoryTagText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  cardTitle: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
-  },
-  collectionRow: {
-    paddingHorizontal: 20,
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  collectionItem: {
-    flex: 1,
-    maxWidth: '48%',
-    alignItems: 'center',
-  },
-  collectionThumbnail: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 12,
-  },
-  collectionTitle: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
-  },
-  manageButton: {
-    backgroundColor: '#007aff',
-    paddingHorizontal: 15,
-    paddingVertical: 6,
-    borderRadius: 15,
-  },
-  manageButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  flatListContent: {
-    paddingBottom: 20,
   },
 });
